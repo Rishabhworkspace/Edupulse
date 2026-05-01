@@ -29,7 +29,6 @@ const CouponSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-CouponSchema.index({ code: 1 });
 CouponSchema.index({ isActive: 1, expiresAt: 1 });
 
 // Virtual: is expired

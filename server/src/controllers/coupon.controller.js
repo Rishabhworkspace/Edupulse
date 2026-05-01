@@ -3,7 +3,6 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const { paginate, paginationMeta } = require('../utils/paginate');
-const { createObjectCsvStringifier } = require('csv-writer');
 
 // POST /api/v1/coupons
 const createCoupon = asyncHandler(async (req, res) => {

@@ -16,12 +16,15 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     api.get(`/courses?limit=1`).then(async () => {
-      // Fetch course by ID from the course detail endpoint (use slug fallback)
       try {
         const { data } = await api.get(`/courses/${courseId}`);
         setCourse(data.data);
-      } catch {}
-      setLoading(false);
+      } catch (err) {
+        console.error('Failed to load course:', err);
+        toast.error('Failed to load course details');
+      } finally {
+        setLoading(false);
+      }
     }).catch(() => setLoading(false));
   }, [courseId]);
 
@@ -52,7 +55,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex items-center justify-center py-12" style={{ background: 'var(--bg)' }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg px-6">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: '#5C5FEF10' }}>
+          <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: '#F4845F10' }}>
             <ShoppingCart className="w-7 h-7 text-primary" />
           </div>
           <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Checkout</h1>
