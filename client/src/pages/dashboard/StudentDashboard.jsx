@@ -19,7 +19,7 @@ export default function StudentDashboard() {
   const avgProgress = enrollments.length ? Math.round(enrollments.reduce((a, e) => a + e.progressPercent, 0) / enrollments.length) : 0;
 
   const stats = [
-    { icon: BookOpen, label: 'Enrolled Courses', value: enrollments.length, color: '#5C5FEF' },
+    { icon: BookOpen, label: 'Enrolled Courses', value: enrollments.length, color: '#F4845F' },
     { icon: TrendingUp, label: 'Avg. Progress', value: `${avgProgress}%`, color: '#10B981' },
     { icon: Award, label: 'Completed', value: completed.length, color: '#F59E0B' },
     { icon: Clock, label: 'In Progress', value: inProgress.length, color: '#3B82F6' },
@@ -51,7 +51,7 @@ export default function StudentDashboard() {
           <h2 className="font-display text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Your Achievements</h2>
           <div className="flex flex-wrap gap-4">
             {user?.xpPoints > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: '#5C5FEF15' }}>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: '#F4845F15' }}>
                 <Zap className="w-5 h-5 text-primary" />
                 <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{user.xpPoints} XP</span>
               </div>

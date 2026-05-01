@@ -18,7 +18,10 @@ export default function AdminUsersPage() {
       if (roleFilter) q.set('role', roleFilter);
       const { data } = await api.get(`/users?${q}`);
       setUsers(data.data || []);
-    } catch {} finally { setLoading(false); }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+      toast.error('Failed to load users');
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchUsers(); }, [search, roleFilter]);

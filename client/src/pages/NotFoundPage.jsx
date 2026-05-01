@@ -11,7 +11,7 @@ export default function NotFoundPage() {
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200 }}
           className="font-display text-[8rem] font-extrabold leading-none mb-2"
-          style={{ background: 'linear-gradient(135deg, #5C5FEF, #818CF8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+          style={{ background: 'linear-gradient(135deg, #F4845F, #8DB580)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
         >
           404
         </motion.div>

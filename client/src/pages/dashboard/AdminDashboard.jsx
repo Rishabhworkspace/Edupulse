@@ -19,7 +19,7 @@ export default function AdminDashboard() {
 
   const stats = [
     { icon: DollarSign, label: 'Total GMV', value: `₹${revenue.gmv?.toLocaleString()}`, color: '#10B981' },
-    { icon: CreditCard, label: 'Platform Revenue', value: `₹${Math.round(revenue.platformRevenue || 0).toLocaleString()}`, color: '#5C5FEF' },
+    { icon: CreditCard, label: 'Platform Revenue', value: `₹${Math.round(revenue.platformRevenue || 0).toLocaleString()}`, color: '#F4845F' },
     { icon: TrendingUp, label: 'Total Orders', value: revenue.orderCount, color: '#F59E0B' },
     { icon: Tag, label: 'Refunds', value: `₹${(revenue.refundTotal || 0).toLocaleString()}`, color: '#EF4444' },
   ];
@@ -47,15 +47,15 @@ export default function AdminDashboard() {
           <AreaChart data={mockChart}>
             <defs>
               <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#5C5FEF" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#5C5FEF" stopOpacity={0} />
+                <stop offset="0%" stopColor="#F4845F" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#F4845F" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
             <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
             <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
-            <Area type="monotone" dataKey="revenue" stroke="#5C5FEF" strokeWidth={2} fill="url(#revGrad)" />
+            <Area type="monotone" dataKey="revenue" stroke="#F4845F" strokeWidth={2} fill="url(#revGrad)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

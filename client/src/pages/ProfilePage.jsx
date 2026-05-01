@@ -78,7 +78,7 @@ export default function ProfilePage() {
           <h3 className="font-display text-base font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Achievements</h3>
           <div className="flex flex-wrap gap-3">
             {user?.xpPoints > 0 && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: '#5C5FEF15' }}>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: '#F4845F15' }}>
                 <Zap className="w-4 h-4 text-primary" />
                 <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{user.xpPoints} XP</span>
               </div>

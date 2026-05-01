@@ -18,7 +18,7 @@ export default function InstructorDashboard() {
 
   const stats = [
     { icon: DollarSign, label: 'Total Earnings', value: `₹${revenue.totalPayout?.toLocaleString() || 0}`, color: '#10B981' },
-    { icon: BookOpen, label: 'My Courses', value: courses.length, color: '#5C5FEF' },
+    { icon: BookOpen, label: 'My Courses', value: courses.length, color: '#F4845F' },
     { icon: Users, label: 'Total Sales', value: revenue.orderCount || 0, color: '#F59E0B' },
     { icon: TrendingUp, label: 'Avg Rating', value: courses.length ? (courses.reduce((a, c) => a + (c.rating || 0), 0) / courses.length).toFixed(1) : '—', color: '#3B82F6' },
   ];
@@ -46,7 +46,7 @@ export default function InstructorDashboard() {
       <h2 className="font-display text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Quick Actions</h2>
       <div className="grid md:grid-cols-2 gap-4 mb-6">
         <Link to="/instructor/qa" className="card p-5 flex items-center gap-4 no-underline group hover:border-primary/20" style={{ borderColor: 'var(--border)' }}>
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#5C5FEF10' }}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: '#F4845F10' }}>
             <MessageCircle className="w-5 h-5 text-primary" />
           </div>
           <div>
