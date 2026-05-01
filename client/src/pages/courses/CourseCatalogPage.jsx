@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Filter, Star, Clock, Users, BookOpen, ChevronDown, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import api from '@/lib/api';
+import toast from 'react-hot-toast';
 import CourseCard from '@/components/shared/CourseCard';
 
 const levels = ['All', 'beginner', 'intermediate', 'advanced'];
@@ -42,7 +43,10 @@ export default function CourseCatalogPage() {
         page: parseInt(data.pagination?.page || 1),
         totalPages: Math.ceil((data.pagination?.total || 0) / (data.pagination?.limit || 12))
       });
-    } catch {} finally { setLoading(false); }
+    } catch (err) {
+      console.error('Failed to fetch courses:', err);
+      toast.error('Failed to load courses');
+    } finally { setLoading(false); }
   };
 
   const goToPage = (newPage) => {
