@@ -63,7 +63,7 @@ UserSchema.methods.toJSON = function () {
 
 // Indexes
 UserSchema.index({ role: 1, isBanned: 1 });
-UserSchema.index({ name: 'text', email: 'text' });
+UserSchema.index({ name: 'text' });
 UserSchema.index({ emailVerifyToken: 1 }, { sparse: true });
 UserSchema.index({ passwordResetToken: 1 }, { sparse: true });
 

@@ -1,5 +1,4 @@
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const GitHubStrategy = require('passport-github2').Strategy;
 const User = require('../models/User');
 
 module.exports = (passport) => {
@@ -32,13 +31,6 @@ module.exports = (passport) => {
     passport.use(new GoogleStrategy(
       { clientID: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET, callbackURL: '/api/v1/auth/oauth/google/callback' },
       (accessToken, refreshToken, profile, done) => handleOAuth('google', profile, done)
-    ));
-  }
-
-  if (process.env.GITHUB_CLIENT_ID) {
-    passport.use(new GitHubStrategy(
-      { clientID: process.env.GITHUB_CLIENT_ID, clientSecret: process.env.GITHUB_CLIENT_SECRET, callbackURL: '/api/v1/auth/oauth/github/callback', scope: ['user:email'] },
-      (accessToken, refreshToken, profile, done) => handleOAuth('github', profile, done)
     ));
   }
 };

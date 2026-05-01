@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-[80vh] flex items-center justify-center py-12">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md px-6">
         <div className="card p-8 text-center">
-          <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center" style={{ background: '#5C5FEF10' }}>
+          <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center" style={{ background: '#F4845F10' }}>
             <Mail className="w-7 h-7 text-primary" />
           </div>
           <h1 className="font-display text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>{sent ? 'Check your email' : 'Forgot password?'}</h1>

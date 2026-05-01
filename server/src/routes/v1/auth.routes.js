@@ -17,8 +17,4 @@ router.patch('/reset-password/:token', c.resetPassword);
 router.get('/oauth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/oauth/google/callback', passport.authenticate('google', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth` }), c.oauthCallback);
 
-// GitHub OAuth
-router.get('/oauth/github', passport.authenticate('github', { scope: ['user:email'] }));
-router.get('/oauth/github/callback', passport.authenticate('github', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth` }), c.oauthCallback);
-
 module.exports = router;
