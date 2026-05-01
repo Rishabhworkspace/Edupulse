@@ -27,6 +27,16 @@ Thumbs.db
 required/
 pdf_out.txt
 pdf_content.txt
+generate_ppt.py
+edupulse-presentation*
+*.pptx
+
+# Custom folders
+do-it/
+implementation/
+.agents/
+agents.md
+scripts/
 
 # Temp files
 *.log
