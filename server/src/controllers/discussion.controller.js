@@ -4,16 +4,27 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const { paginate, paginationMeta } = require('../utils/paginate');
 
-// GET /api/v1/courses/:courseId/discussions
+// GET /api/v1/courses/:courseId/discussions or GET /api/v1/courses/community/discussions (global)
 const getDiscussions = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20, lessonId } = req.query;
-  const filter = { course: req.params.courseId };
+  const { page = 1, limit = 20, lessonId, search, tag } = req.query;
+  const filter = {};
+  
+  if (req.params.courseId && req.params.courseId !== 'community') {
+    filter.course = req.params.courseId;
+  } else {
+    // Global community feed: only root posts (no parent) and not tied to a course? 
+    // Or just all root posts. Let's say all root posts.
+    filter.parent = null;
+  }
+  
   if (lessonId) filter.lesson = lessonId;
+  if (tag) filter.tags = tag.toLowerCase();
+  if (search) filter.$text = { $search: search };
   
   const { skip, limit: lim } = paginate(req.query, { page, limit });
   const [discussions, total] = await Promise.all([
     Discussion.find(filter)
-      .populate('user', 'name avatar')
+      .populate('user', 'name avatar role')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(lim),
@@ -22,20 +33,32 @@ const getDiscussions = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, discussions, 'Discussions fetched', paginationMeta(total, page, limit)));
 });
 
-// POST /api/v1/courses/:courseId/discussions
+// GET /api/v1/courses/discussions/:id/replies
+const getDiscussionReplies = asyncHandler(async (req, res) => {
+  const replies = await Discussion.find({ parent: req.params.id })
+    .populate('user', 'name avatar role')
+    .sort({ createdAt: 1 });
+  res.json(new ApiResponse(200, replies, 'Replies fetched'));
+});
+
+// POST /api/v1/courses/:courseId/discussions or POST /api/v1/courses/community/discussions
 const createDiscussion = asyncHandler(async (req, res) => {
+  const isGlobal = req.params.courseId === 'community';
+  
   const discussion = await Discussion.create({
     user: req.user._id,
-    course: req.params.courseId,
+    course: isGlobal ? null : req.params.courseId,
     lesson: req.body.lessonId || null,
     parent: req.body.parentId || null,
+    title: req.body.title || null,
     content: req.body.content,
+    tags: req.body.tags || [],
   });
-  await discussion.populate('user', 'name avatar');
+  await discussion.populate('user', 'name avatar role');
   res.status(201).json(new ApiResponse(201, discussion, 'Discussion created'));
 });
 
-// POST /api/v1/courses/:courseId/discussions/:id/upvote
+// POST /api/v1/courses/discussions/:id/upvote (made courseId optional in route)
 const toggleUpvote = asyncHandler(async (req, res) => {
   const discussion = await Discussion.findById(req.params.id);
   if (!discussion) throw new ApiError(404, 'Discussion not found');
@@ -100,4 +123,4 @@ const getInstructorDiscussions = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, discussions, 'Discussions fetched', paginationMeta(total, page, limit)));
 });
 
-module.exports = { getDiscussions, createDiscussion, toggleUpvote, resolveDiscussion, getInstructorDiscussions };
+module.exports = { getDiscussions, getDiscussionReplies, createDiscussion, toggleUpvote, resolveDiscussion, getInstructorDiscussions };
