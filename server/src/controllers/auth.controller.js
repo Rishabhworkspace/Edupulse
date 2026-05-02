@@ -22,6 +22,23 @@ const register = asyncHandler(async (req, res) => {
   const exists = await User.findOne({ email });
   if (exists) throw new ApiError(409, 'Email already registered');
 
+  const isDev = process.env.NODE_ENV !== 'production';
+  
+  if (isDev) {
+    // Auto-verify in development mode
+    const user = await User.create({
+      name,
+      email,
+      password,
+      isVerified: true,
+    });
+
+    return res.status(201).json(
+      new ApiResponse(201, { _id: user._id, name: user.name, email: user.email, role: user.role },
+        'Registration successful! You can now log in.')
+    );
+  }
+
   const otp = generateOTP();
   const user = await User.create({
     name,
@@ -48,7 +65,16 @@ const login = asyncHandler(async (req, res) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch) throw new ApiError(401, 'Invalid email or password');
   if (user.isBanned) throw new ApiError(403, 'Account suspended. Contact support.');
-  if (!user.isVerified) throw new ApiError(403, 'Please verify your email first');
+
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (!user.isVerified) {
+    if (isDev) {
+      user.isVerified = true;
+      await user.save({ validateBeforeSave: false });
+    } else {
+      throw new ApiError(403, 'Please verify your email first');
+    }
+  }
 
   const payload = { id: user._id, role: user.role };
   const accessToken = generateAccessToken(payload);
@@ -119,14 +145,6 @@ const resendVerification = asyncHandler(async (req, res) => {
   if (!user) throw new ApiError(404, 'No account with that email');
   if (user.isVerified) throw new ApiError(400, 'Email already verified');
 
-  // Rate Limiting: Enforce 2-minute cooldown
-  if (user.emailVerifyExpires) {
-    const timeSinceLastOtp = (10 * 60 * 1000) - (user.emailVerifyExpires - Date.now());
-    if (timeSinceLastOtp < 2 * 60 * 1000) {
-      throw new ApiError(429, 'Please wait 2 minutes before requesting a new OTP.');
-    }
-  }
-
   const otp = generateOTP();
   user.emailVerifyToken = crypto.createHash('sha256').update(otp).digest('hex');
   user.emailVerifyExpires = Date.now() + 10 * 60 * 1000;
@@ -177,8 +195,23 @@ const oauthCallback = asyncHandler(async (req, res) => {
   const refreshTokenVal = generateRefreshToken(payload);
   user.refreshToken = refreshTokenVal;
   await user.save({ validateBeforeSave: false });
+
+  // Set refresh token in long-lived secure cookie
   res.cookie('refreshToken', refreshTokenVal, COOKIE_OPTIONS);
-  res.redirect(`${process.env.CLIENT_URL}/oauth-success?token=${accessToken}`);
+
+  // Set access token in short-lived exchange cookie
+  res.cookie('tempToken', accessToken, { ...COOKIE_OPTIONS, maxAge: 5 * 60 * 1000 }); // 5 mins
+
+  res.redirect(`${process.env.CLIENT_URL}/oauth-success`);
 });
 
-module.exports = { register, login, logout, refreshToken, verifyEmail, resendVerification, forgotPassword, resetPassword, oauthCallback };
+// GET /api/v1/auth/oauth-exchange
+const exchangeToken = asyncHandler(async (req, res) => {
+  const token = req.cookies?.tempToken;
+  if (!token) throw new ApiError(401, 'Exchange token not found or expired');
+
+  res.clearCookie('tempToken', COOKIE_OPTIONS);
+  res.json(new ApiResponse(200, { accessToken: token }, 'Token exchanged successfully'));
+});
+
+module.exports = { register, login, logout, refreshToken, verifyEmail, resendVerification, forgotPassword, resetPassword, oauthCallback, exchangeToken };
