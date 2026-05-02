@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Enrollment = require('../models/Enrollment');
+const { Section, Lesson } = require('../models/Lesson'); // Ensure Section and Lesson models are registered
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
@@ -97,7 +98,19 @@ const getUserEnrollments = asyncHandler(async (req, res) => {
   }
 
   const enrollments = await Enrollment.find({ user: userId })
-    .populate('course', 'title thumbnail rating price slug totalLessons')
+    .populate({
+      path: 'course',
+      select: 'title thumbnail rating price slug totalLessons totalDuration category curriculum',
+      populate: {
+        path: 'curriculum',
+        model: 'Section',
+        populate: {
+          path: 'lessons',
+          model: 'Lesson',
+          select: 'title type estimatedMinutes videoDuration description',
+        }
+      }
+    })
     .sort({ lastAccessedAt: -1 });
 
   res.json(new ApiResponse(200, enrollments));
