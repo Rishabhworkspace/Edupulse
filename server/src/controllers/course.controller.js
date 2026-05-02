@@ -118,8 +118,33 @@ const enrollFree = async (req, res) => {
   res.status(201).json(new ApiResponse(201, {}, 'Enrolled successfully'));
 };
 
+const getEnrollment = async (req, res) => {
+  const enrollment = await courseService.getEnrollment(req.user._id, req.params.id);
+  res.json(new ApiResponse(200, enrollment));
+};
+
+const saveNote = async (req, res) => {
+  const { id: courseId, lessonId } = req.params;
+  const { content } = req.body;
+  const Enrollment = require('../models/Enrollment');
+
+  const enrollment = await Enrollment.findOne({ user: req.user._id, course: courseId });
+  if (!enrollment) throw new ApiError(403, 'Not enrolled in this course');
+
+  const noteIdx = enrollment.notes.findIndex((n) => n.lesson?.toString() === lessonId);
+  if (noteIdx >= 0) {
+    enrollment.notes[noteIdx].content = content;
+    enrollment.notes[noteIdx].updatedAt = new Date();
+  } else {
+    enrollment.notes.push({ lesson: lessonId, content });
+  }
+
+  await enrollment.save();
+  res.json(new ApiResponse(200, enrollment.notes, 'Note saved'));
+};
+
 const markLessonComplete = async (req, res) => {
-  const result = await courseService.markLessonComplete(req.user._id, req.params.id, req.params.lessonId);
+  const result = await courseService.markLessonComplete(req.user._id, req.params.courseId, req.params.lessonId);
   res.json(new ApiResponse(200, result));
 };
 
@@ -133,5 +158,5 @@ module.exports = {
   updateCourse, deleteCourse, publishCourse, addSection, updateSection,
   deleteSection, addLesson, updateLesson, deleteLesson, syncCurriculum,
   reorderCurriculum, getCourseAnalytics, addReview, getReviews, enrollFree,
-  markLessonComplete, updateCourseThumbnail
+  markLessonComplete, updateCourseThumbnail, getEnrollment, saveNote
 };

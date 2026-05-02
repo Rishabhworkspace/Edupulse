@@ -10,15 +10,19 @@ const v = courseValidator;
 
 router.get('/', optionalAuth, c.getCourses);
 router.get('/stats', c.getStats);
+router.get('/instructor/discussions', verifyJWT, authorise('instructor', 'admin'), d.getInstructorDiscussions);
+router.get('/discussions/:id/replies', d.getDiscussionReplies);
+router.post('/discussions/:id/upvote', verifyJWT, d.toggleUpvote);
+router.get('/:courseId/discussions', optionalAuth, d.getDiscussions);
 router.get('/:slug', optionalAuth, c.getCourseBySlug);
 router.get('/:id/reviews', c.getReviews);
-router.get('/:id/discussions', d.getDiscussions);
 
 router.post('/:id/reviews', verifyJWT, authorise('student'), validate(v.reviewSchema), c.addReview);
 router.post('/:id/enroll', verifyJWT, authorise('student'), c.enrollFree);
+router.get('/:id/enrollment', verifyJWT, c.getEnrollment);
+router.patch('/:id/lessons/:lessonId/notes', verifyJWT, c.saveNote);
 router.patch('/:courseId/lessons/:lessonId/progress', verifyJWT, c.markLessonComplete);
-router.post('/:id/discussions', verifyJWT, authorise('student', 'instructor'), d.createDiscussion);
-router.post('/:courseId/discussions/:id/upvote', verifyJWT, d.toggleUpvote);
+router.post('/:courseId/discussions', verifyJWT, authorise('student', 'instructor'), d.createDiscussion);
 router.patch('/:courseId/discussions/:id/resolve', verifyJWT, d.resolveDiscussion);
 
 router.post('/', verifyJWT, authorise('instructor', 'admin'), validate(v.createCourseSchema), c.createCourse);
@@ -36,7 +40,5 @@ router.patch('/:id/sections/:sId/lessons/:lId', verifyJWT, authorise('instructor
 router.delete('/:id/sections/:sId/lessons/:lId', verifyJWT, authorise('instructor', 'admin'), c.deleteLesson);
 router.patch('/:id/reorder', verifyJWT, authorise('instructor', 'admin'), validate(v.reorderSchema), c.reorderCurriculum);
 router.get('/:id/analytics', verifyJWT, authorise('instructor', 'admin'), c.getCourseAnalytics);
-
-router.get('/instructor/discussions', verifyJWT, authorise('instructor', 'admin'), d.getInstructorDiscussions);
 
 module.exports = router;
