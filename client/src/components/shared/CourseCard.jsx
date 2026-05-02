@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function CourseCard({ course }) {
-  const { user, isAuthenticated } = useSelector((s) => s.auth);
+  const { user } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
 
   const isWishlisted = user?.wishlist?.some((c) => (c._id || c) === course._id);
@@ -14,7 +14,7 @@ export default function CourseCard({ course }) {
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) return toast.error('Please login to add to wishlist');
+    if (!user) return toast.error('Please login to add to wishlist');
 
     try {
       const { data } = await api.patch(`/users/me/wishlist/${course._id}`);

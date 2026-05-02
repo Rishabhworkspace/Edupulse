@@ -6,18 +6,21 @@ const testimonials = [
     role: 'Frontend Developer at Flipkart',
     quote: 'I switched careers from teaching to tech in just 4 months. The web development course was incredibly well-structured, and the projects I built actually helped me crack interviews.',
     color: '#7EC8C8',
+    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop&q=80',
   },
   {
     name: 'Arjun Mehta',
     role: 'Data Analyst at Razorpay',
     quote: 'What I appreciated most was how the instructors broke down complex data science concepts. I went from knowing nothing about Python to building predictive models for my team.',
     color: '#F5D770',
+    photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&h=120&fit=crop&q=80',
   },
   {
     name: 'Sneha Reddy',
     role: 'UX Designer, Freelance',
     quote: 'The UI/UX course gave me a proper design process — not just tools. Within two weeks of finishing, I had my first paying client. The community feedback was a huge bonus.',
     color: '#C4B5E8',
+    photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&h=120&fit=crop&q=80',
   },
 ];
 
@@ -74,20 +77,19 @@ export default function TestimonialCarousel() {
           {/* Circular photo placeholder with color block */}
           <div
             style={{
-              width: 52,
-              height: 52,
+              width: 56,
+              height: 56,
               borderRadius: '50%',
-              background: t.color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 700,
-              fontSize: 20,
+              border: `3px solid ${t.color}`,
+              overflow: 'hidden',
+              flexShrink: 0,
             }}
           >
-            {t.name[0]}
+            <img 
+              src={t.photo} 
+              alt={t.name} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            />
           </div>
           <div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 16, color: 'var(--color-text-primary)', margin: 0 }}>

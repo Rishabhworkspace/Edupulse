@@ -13,9 +13,8 @@ export function useEnrollment(courseId) {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.get('/users/me/enrollments');
-      const found = data.data?.find((e) => e.course?._id === courseId);
-      setEnrollment(found || null);
+      const { data } = await api.get(`/courses/${courseId}/enrollment`);
+      setEnrollment(data.data || null);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load enrollment');
     } finally {

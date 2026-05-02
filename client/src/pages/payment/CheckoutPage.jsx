@@ -4,34 +4,41 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, Tag, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import MockPaymentPopup from '@/components/payment/MockPaymentPopup';
+import { useSelector } from 'react-redux';
+import { getDashboardUrl } from '@/utils/navigation';
 
 export default function CheckoutPage() {
-  const { courseId } = useParams();
+  const { courseSlug } = useParams();
   const navigate = useNavigate();
+  const { user } = useSelector((s) => s.auth);
   const [course, setCourse] = useState(null);
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(0);
 
   useEffect(() => {
-    api.get(`/courses?limit=1`).then(async () => {
+    (async () => {
       try {
-        const { data } = await api.get(`/courses/${courseId}`);
+        const { data } = await api.get(`/courses/${courseSlug}`);
         setCourse(data.data);
       } catch (err) {
         console.error('Failed to load course:', err);
         toast.error('Failed to load course details');
+        navigate('/courses');
       } finally {
         setLoading(false);
       }
-    }).catch(() => setLoading(false));
-  }, [courseId]);
+    })();
+  }, [courseSlug, navigate]);
 
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) return;
     try {
-      const { data } = await api.post('/coupons/validate', { code: couponCode, courseId, orderAmount: course.price });
+      const { data } = await api.post('/coupons/validate', { code: couponCode, courseId: course._id, orderAmount: course.price });
       setDiscount(data.data);
       toast.success(`Coupon applied! ${data.data.discountType === 'percentage' ? `${data.data.discountValue}% off` : `₹${data.data.discountValue} off`}`);
     } catch (err) { toast.error(err.response?.data?.message || 'Invalid coupon'); setDiscount(null); }
@@ -40,10 +47,35 @@ export default function CheckoutPage() {
   const handleCheckout = async () => {
     setProcessing(true);
     try {
-      const { data } = await api.post('/payments/checkout', { courseId, couponCode: discount ? couponCode : '' });
-      if (data.data.free) { toast.success('Enrolled for free!'); navigate('/dashboard'); return; }
-      window.location.href = data.data.url;
-    } catch (err) { toast.error(err.response?.data?.message || 'Checkout failed'); } finally { setProcessing(false); }
+      const { data } = await api.post('/payments/checkout', { courseId: course._id, couponCode: discount ? couponCode : '' });
+      if (data.data.free) { 
+        toast.success('Enrolled for free!'); 
+        navigate(user?.role === 'student' ? '/dashboard/enrolled' : getDashboardUrl(user?.role)); 
+        setProcessing(false);
+        return; 
+      }
+      if (data.data.mockPayment) {
+        setPaymentAmount(data.data.amount);
+        setShowPaymentPopup(true);
+      } else {
+        window.location.href = data.data.url;
+      }
+    } catch (err) { 
+      toast.error(err.response?.data?.message || 'Checkout failed'); 
+    } finally { 
+      setProcessing(false); 
+    }
+  };
+
+  const handlePaymentSuccess = async () => {
+    setShowPaymentPopup(false);
+    try {
+      await api.post('/payments/mock-complete', { courseId: course._id, couponCode: discount ? couponCode : '' });
+      toast.success('Payment successful! You are now enrolled.');
+      navigate(user?.role === 'student' ? '/dashboard/enrolled' : getDashboardUrl(user?.role));
+    } catch (err) {
+      toast.error('Enrollment failed. Please contact support.');
+    }
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" /></div>;
@@ -97,6 +129,14 @@ export default function CheckoutPage() {
           <p className="text-xs text-center mt-3" style={{ color: 'var(--text-muted)' }}>Secure payment powered by Stripe</p>
         </div>
       </motion.div>
+
+      <MockPaymentPopup 
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
+        amount={paymentAmount}
+        courseTitle={course?.title}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }
