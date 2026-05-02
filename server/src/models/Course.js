@@ -5,15 +5,16 @@ const CourseSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true, maxlength: 200 },
     slug: { type: String, unique: true, lowercase: true },
     description: { type: String, maxlength: 5000 },
+    longDescription: { type: String, default: '' },
     shortDescription: { type: String, maxlength: 300 },
     thumbnail: { type: String, default: '' },
     previewVideo: { type: String, default: '' },
     instructor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     category: { 
       type: String, 
-      enum: ['Web Development', 'Data Science', 'Mobile Development', 'UI/UX Design', 'Cloud & DevOps', 'Cybersecurity'],
-      default: 'Web Development'
+      default: 'General'
     },
+    subcategory: { type: String, default: '' },
     tags: [{ type: String, lowercase: true }],
     level: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
     language: { type: String, default: 'English' },

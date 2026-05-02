@@ -22,9 +22,12 @@ const LessonSchema = new mongoose.Schema(
     },
     videoUrl: { type: String, default: '' },
     videoDuration: { type: Number, default: 0 }, // seconds
+    description: { type: String, default: '' }, // Short summary shown in curriculum list
+    estimatedMinutes: { type: Number, default: 10 }, // Reading/exercise time
     content: { type: String, default: '' }, // rich-text for articles
     isPreview: { type: Boolean, default: false },
-    resources: [{ name: String, url: String, type: String }],
+    resources: [{ name: String, url: String, resourceType: String }],
+    attachments: [{ name: String, url: String, size: String }], // Downloadable files
     order: { type: Number, default: 0 },
     // Quiz fields
     questions: [
