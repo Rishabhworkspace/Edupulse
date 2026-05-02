@@ -18,6 +18,7 @@ const userRoutes = require('./routes/v1/user.routes');
 const courseRoutes = require('./routes/v1/course.routes');
 const paymentRoutes = require('./routes/v1/payment.routes');
 const couponRoutes = require('./routes/v1/coupon.routes');
+const contactRoutes = require('./routes/v1/contact.routes');
 
 const app = express();
 
@@ -25,17 +26,28 @@ const app = express();
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
 
 // CORS
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+];
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) cb(null, true);
+    else cb(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }));
 
-// Stripe webhook must receive raw body — register BEFORE express.json()
-app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }));
-
 // Body parsing
-app.use(express.json({ limit: '10mb' }));
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/v1/payments/webhook') {
+    next();
+  } else {
+    express.json({ limit: '10mb' })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(compression());
@@ -62,6 +74,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/coupons', couponRoutes);
+app.use('/api/v1/contact', contactRoutes);
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` }));

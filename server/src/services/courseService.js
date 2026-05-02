@@ -78,22 +78,54 @@ class CourseService {
       return { ...cached, isEnrolled };
     }
 
-    const course = await Course.findOne({ slug, status: 'published' })
+    const isObjectId = /^[a-f\d]{24}$/i.test(slug);
+    const query = isObjectId
+      ? { _id: slug, status: 'published' }
+      : { slug, status: 'published' };
+
+    // Check enrollment in parallel with course fetch to cut latency
+    let isEnrolled = false;
+
+    // Single query: find + populate in one go (eliminates redundant findById)
+    const coursePromise = Course.findOne(query)
       .populate('instructor', 'name avatar bio')
       .populate({
         path: 'curriculum',
         model: 'Section',
-        populate: { path: 'lessons', model: 'Lesson', select: 'title type duration isPreview order videoDuration' },
-      });
+        populate: { path: 'lessons', model: 'Lesson' },
+      })
+      .lean();
+
+    // If user is logged in, run enrollment check in parallel
+    if (user) {
+      // We need the course ID for enrollment check, but we can start the query
+      const [course] = await Promise.all([coursePromise]);
+      if (!course) throw new ApiError(404, 'Course not found');
+      isEnrolled = !!(await Enrollment.findOne({ user: user._id, course: course._id }));
+
+      // Filter lesson fields if not enrolled
+      if (!isEnrolled && course.curriculum) {
+        const allowedFields = ['title', 'type', 'description', 'isPreview', 'order', 'videoDuration', 'estimatedMinutes', 'resources', '_id'];
+        course.curriculum.forEach(section => {
+          if (section.lessons) {
+            section.lessons = section.lessons.map(lesson => {
+              const filtered = {};
+              allowedFields.forEach(f => { if (lesson[f] !== undefined) filtered[f] = lesson[f]; });
+              return filtered;
+            });
+          }
+        });
+      }
+
+      const result = { ...course, isEnrolled };
+      return result;
+    }
+
+    const course = await coursePromise;
     if (!course) throw new ApiError(404, 'Course not found');
 
-    let isEnrolled = false;
-    if (user) {
-      isEnrolled = !!(await Enrollment.findOne({ user: user._id, course: course._id }));
-    }
-    const result = { ...course.toObject(), isEnrolled };
-
-    if (!user) await cacheSet(cacheKey, result);
+    const result = { ...course, isEnrolled };
+    await cacheSet(cacheKey, result);
     return result;
   }
 
@@ -279,7 +311,7 @@ class CourseService {
         if (lesData._id && existingLessonMap.has(lesData._id)) {
           const updates = { ...lesData };
           delete updates._id;
-          lesson = await Lesson.findByIdAndUpdate(lesData._id, { ...updates, order: j }, { new: true });
+          lesson = await Lesson.findByIdAndUpdate(lesData._id, { ...updates, section: section._id, order: j }, { new: true });
         } else {
           lesson = await Lesson.create({
             ...lesData,
@@ -300,16 +332,18 @@ class CourseService {
       newCurriculumIds.push(section._id);
     }
 
+    // Cleanup: Delete lessons and sections no longer used
+    const lessonsToDelete = existingLessons
+      .filter(l => !usedLessonIds.has(l._id.toString()))
+      .map(l => l._id);
+    if (lessonsToDelete.length > 0) {
+      await Lesson.deleteMany({ _id: { $in: lessonsToDelete } });
+    }
+
     const sectionsToDelete = existingSections
       .filter(s => !usedSectionIds.has(s._id.toString()))
       .map(s => s._id);
     if (sectionsToDelete.length > 0) {
-      const lessonsToDelete = existingLessons
-        .filter(l => l.section && sectionsToDelete.includes(l.section.toString()))
-        .map(l => l._id);
-      if (lessonsToDelete.length > 0) {
-        await Lesson.deleteMany({ _id: { $in: lessonsToDelete } });
-      }
       await Section.deleteMany({ _id: { $in: sectionsToDelete } });
     }
 
@@ -392,6 +426,13 @@ class CourseService {
     await Enrollment.create({ user: userId, course: course._id });
     await Course.findByIdAndUpdate(course._id, { $inc: { enrolledCount: 1 } });
     return {};
+  }
+
+  async getEnrollment(userId, courseId) {
+    const enrollment = await Enrollment.findOne({ user: userId, course: courseId })
+      .populate('course', 'title thumbnail rating price slug totalLessons')
+      .lean();
+    return enrollment;
   }
 
   async markLessonComplete(userId, courseId, lessonId) {

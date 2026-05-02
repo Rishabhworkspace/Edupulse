@@ -14,7 +14,6 @@ const start = async () => {
 
 process.on('unhandledRejection', (err) => {
   logger.error(`Unhandled Rejection: ${err.message}`);
-  process.exit(1);
 });
 
 process.on('SIGTERM', () => {
