@@ -24,7 +24,16 @@ export default function Navbar() {
   const navLinks = [
     { to: '/', label: 'Home' },
     { to: '/courses', label: 'Courses' },
+    { to: '/about', label: 'About Us' },
+    { to: '/contact', label: 'Contact Us' },
   ];
+
+  const handleLogoClick = (e) => {
+    if (window.location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <header
@@ -37,7 +46,7 @@ export default function Navbar() {
     >
       <div className="container flex items-center justify-between" style={{ height: 64, padding: '14px 32px' }}>
         {/* Logo — Fraunces wordmark */}
-        <Link to="/" className="no-underline flex items-center gap-1">
+        <Link to="/" onClick={handleLogoClick} className="no-underline flex items-center gap-1">
           <span className="font-display text-2xl" style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
             Edu<span style={{ color: 'var(--color-coral)' }}>Pulse</span>
           </span>
@@ -110,14 +119,29 @@ export default function Navbar() {
                       <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{user.name}</p>
                       <p className="text-xs capitalize" style={{ color: 'var(--color-text-muted)' }}>{user.role}</p>
                     </div>
-                    <Link to="/dashboard" onClick={() => setDropOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors no-underline" style={{ color: 'var(--color-text-body)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-100)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <Link 
+                      to={user.role === 'admin' ? '/admin' : user.role === 'instructor' ? '/instructor' : '/dashboard'} 
+                      onClick={() => setDropOpen(false)} 
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors no-underline" 
+                      style={{ color: 'var(--color-text-body)' }} 
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-100)'} 
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
                       <LayoutDashboard className="w-4 h-4" /> Dashboard
                     </Link>
                     <Link to="/profile" onClick={() => setDropOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors no-underline" style={{ color: 'var(--color-text-body)' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-100)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <User className="w-4 h-4" /> Profile
                     </Link>
                     <div style={{ borderTop: '1px solid var(--gray-300)', margin: '4px 0' }} />
-                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors" style={{ color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                    <button 
+                      onClick={async () => {
+                        setDropOpen(false);
+                        await dispatch(logoutUser());
+                        window.location.href = '/login';
+                      }} 
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors" 
+                      style={{ color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                    >
                       <LogOut className="w-4 h-4" /> Sign out
                     </button>
                   </motion.div>
