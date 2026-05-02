@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { fetchMe } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
+import api from '@/lib/api';
+import { getDashboardUrl } from '@/utils/navigation';
 
 export default function OAuthSuccessPage() {
   const [searchParams] = useSearchParams();
@@ -10,23 +12,24 @@ export default function OAuthSuccessPage() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      localStorage.setItem('accessToken', token);
-      dispatch(fetchMe())
-        .unwrap()
-        .then(() => {
-          toast.success('Successfully logged in!');
-          navigate('/dashboard');
-        })
-        .catch(() => {
-          toast.error('Failed to complete login. Please try again.');
-          navigate('/login');
-        });
-    } else {
-      navigate('/login');
-    }
-  }, [searchParams, navigate, dispatch]);
+    const completeLogin = async () => {
+      try {
+        const { data } = await api.get('/auth/oauth-exchange');
+        const token = data.data.accessToken;
+        
+        localStorage.setItem('accessToken', token);
+        const user = await dispatch(fetchMe()).unwrap();
+        
+        toast.success('Successfully logged in!');
+        navigate(getDashboardUrl(user.role));
+      } catch (err) {
+        toast.error('Failed to complete login. Please try again.');
+        navigate('/login');
+      }
+    };
+
+    completeLogin();
+  }, [navigate, dispatch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

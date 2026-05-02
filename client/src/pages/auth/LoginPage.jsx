@@ -5,6 +5,7 @@ import { loginUser, clearError } from '@/store/slices/authSlice';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getDashboardUrl } from '@/utils/navigation';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -14,7 +15,7 @@ export default function LoginPage() {
   const { user, loading } = useSelector((s) => s.auth);
 
   useEffect(() => {
-    if (user) navigate('/dashboard');
+    if (user) navigate(getDashboardUrl(user.role));
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -23,7 +24,7 @@ export default function LoginPage() {
     const result = await dispatch(loginUser(form));
     if (loginUser.fulfilled.match(result)) {
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      navigate(getDashboardUrl(result.payload.user?.role));
     } else {
       toast.error(result.payload || 'Login failed');
     }

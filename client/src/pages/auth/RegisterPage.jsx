@@ -5,6 +5,7 @@ import { registerUser, clearError } from '@/store/slices/authSlice';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getDashboardUrl } from '@/utils/navigation';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -14,7 +15,7 @@ export default function RegisterPage() {
   const { user, loading } = useSelector((s) => s.auth);
 
   useEffect(() => {
-    if (user) navigate('/dashboard');
+    if (user) navigate(getDashboardUrl(user.role));
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -22,8 +23,8 @@ export default function RegisterPage() {
     dispatch(clearError());
     const result = await dispatch(registerUser(form));
     if (registerUser.fulfilled.match(result)) {
-      toast.success('Account created! Redirecting to dashboard...');
-      navigate('/dashboard');
+      toast.success('Account created! Please log in.');
+      navigate('/login');
     } else {
       toast.error(result.payload || 'Registration failed');
     }
