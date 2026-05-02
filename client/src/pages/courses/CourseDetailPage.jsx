@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 import CourseHero from '@/components/courses/CourseHero';
+import CourseAbout from '@/components/courses/CourseAbout';
 import CourseInstructor from '@/components/courses/CourseInstructor';
 import CourseOutcomes from '@/components/courses/CourseOutcomes';
 import CourseCurriculum from '@/components/courses/CourseCurriculum';
@@ -23,34 +24,62 @@ export default function CourseDetailPage() {
   const [reviewStats, setReviewStats] = useState({ average: 0, count: 0 });
 
   useEffect(() => {
-    api.get(`/courses/${slug}`)
-      .then(async ({ data }) => {
+    let cancelled = false;
+
+    const fetchWithRetry = async (url, retries = 3, delay = 1000) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          return await api.get(url);
+        } catch (err) {
+          const status = err.response?.status;
+          // Retry on 429 (rate limit) or 5xx server errors
+          if ((status === 429 || (status >= 500 && status < 600)) && i < retries - 1) {
+            await new Promise(r => setTimeout(r, delay * (i + 1)));
+            continue;
+          }
+          throw err;
+        }
+      }
+    };
+
+    const loadCourse = async () => {
+      try {
+        const { data } = await fetchWithRetry(`/courses/${slug}`);
+        if (cancelled) return;
         setCourse(data.data);
         if (data.data._id) {
           try {
             const { data: reviewData } = await api.get(`/courses/${data.data._id}/reviews`);
-            setReviews(reviewData.data || []);
-            setReviewStats(data.data.ratings || { average: data.data.rating, count: data.data.totalReviews });
+            if (!cancelled) {
+              setReviews(reviewData.data || []);
+              setReviewStats(data.data.ratings || { average: data.data.rating, count: data.data.totalReviews });
+            }
           } catch (e) {
             console.error('Failed to load reviews:', e);
           }
         }
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
+      } catch (err) {
+        if (cancelled) return;
         if (err.response?.status === 404) {
           setError('Course not found');
+        } else if (err.response?.status === 429) {
+          setError('Server is busy. Please try again in a moment.');
         } else {
           setError('Failed to load course');
-          console.error('Failed to load course:', err);
         }
-      });
+        console.error('Failed to load course:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadCourse();
+    return () => { cancelled = true; };
   }, [slug]);
 
   const handleEnroll = async () => {
     if (!user) return navigate('/login');
-    if (course.price > 0) return navigate(`/checkout/${course._id}`);
+    if (course.price > 0) return navigate(`/checkout/${course.slug}`);
     try {
       await api.post(`/courses/${course._id}/enroll`);
       toast.success('Enrolled successfully!');
@@ -91,6 +120,7 @@ export default function CourseDetailPage() {
           <div className="lg:col-span-2">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
               <CourseHero course={course} reviewStats={reviewStats} />
+              <CourseAbout longDescription={course.longDescription} />
               <CourseInstructor instructor={course.instructor} />
               <CourseOutcomes outcomes={course.outcomes} />
               <CourseCurriculum curriculum={course.curriculum} />

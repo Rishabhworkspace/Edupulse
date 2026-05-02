@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, BookOpen } from 'lucide-react';
+import { ArrowRight, Play } from 'lucide-react';
 import api from '@/lib/api';
 import CourseCard from '@/components/shared/CourseCard';
 import SectionHeading from '@/components/shared/SectionHeading';
@@ -36,6 +36,11 @@ const missionFeatures = [
 ];
 
 const blockColors = ['#7EC8C8', '#F5D770', '#C4B5E8'];
+const missionImages = [
+  'https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=600&h=480&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=480&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=480&fit=crop&q=80',
+];
 
 export default function HomePage() {
   const [stats, setStats] = useState({ totalCourses: 0, totalEnrollments: 0, completedEnrollments: 0, avgCompletionRate: 0, categoryCounts: {} });
@@ -68,28 +73,6 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left — Content */}
             <motion.div {...fadeUp}>
-              {/* Small floating photo badge */}
-              <div className="flex items-center gap-2 mb-6">
-                <div className="flex -space-x-2">
-                  {['#7EC8C8', '#F5D770', '#C4B5E8', '#F4A98A'].map((c, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-center"
-                      style={{
-                        width: 36, height: 36, borderRadius: '50%',
-                        background: c, border: '3px solid var(--color-bg)',
-                        fontFamily: "'DM Sans', sans-serif", fontWeight: 700,
-                        fontSize: 13, color: 'white',
-                      }}
-                    >
-                      {['P', 'A', 'S', 'R'][i]}
-                    </div>
-                  ))}
-                </div>
-                <div className="stars text-sm">{'★'.repeat(5)}</div>
-                <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-text-body)' }}>4.9/5 from 2,000+ reviews</span>
-              </div>
-
               <h1
                 className="font-display"
                 style={{
@@ -122,37 +105,33 @@ export default function HomePage() {
             </motion.div>
 
             {/* Right — Photo collage */}
-            <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="relative hidden md:block" style={{ minHeight: 420 }}>
-              {/* Color block patches */}
-              <div style={{ position: 'absolute', top: 20, right: 40, width: 200, height: 200, borderRadius: 24, background: '#7EC8C8', opacity: 0.4, transform: 'rotate(6deg)' }} />
-              <div style={{ position: 'absolute', bottom: 40, left: 30, width: 160, height: 160, borderRadius: 20, background: '#F5D770', opacity: 0.4, transform: 'rotate(-4deg)' }} />
-              <div style={{ position: 'absolute', top: 100, left: 60, width: 120, height: 120, borderRadius: 16, background: '#C4B5E8', opacity: 0.3, transform: 'rotate(10deg)' }} />
-
-              {/* Circular photo placeholders */}
+            <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="relative hidden md:block" style={{ minHeight: 480 }}>
+              {/* Cards collage */}
               {[
-                { top: 20, right: 60, size: 160, bg: '#7EC8C8', letter: 'S', shadow: true },
-                { top: 140, left: 40, size: 130, bg: '#F5D770', letter: 'A', shadow: true },
-                { bottom: 30, right: 80, size: 120, bg: '#C4B5E8', letter: 'R', shadow: true },
+                { top: 40, left: 0, width: 240, height: 280, borderRadius: 24, bg: '#7EC8C8', photo: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=400&fit=crop&q=80', tilt: -4 },
+                { top: 0, right: 0, width: 180, height: 180, borderRadius: 20, bg: '#F5D770', photo: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=300&h=300&fit=crop&q=80', tilt: 6 },
+                { bottom: 20, right: 40, width: 160, height: 160, borderRadius: '50%', bg: '#C4B5E8', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&q=80', tilt: 0 },
               ].map((p, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-center"
                   style={{
                     position: 'absolute',
                     ...Object.fromEntries(Object.entries(p).filter(([k]) => ['top', 'right', 'left', 'bottom'].includes(k))),
-                    width: p.size, height: p.size,
-                    borderRadius: '50%',
+                    width: p.width, height: p.height,
+                    borderRadius: p.borderRadius,
                     background: p.bg,
                     border: '4px solid white',
-                    boxShadow: p.shadow ? '0 4px 16px rgba(0,0,0,0.12)' : 'none',
-                    fontFamily: "'Fraunces', serif",
-                    fontWeight: 700,
-                    fontSize: p.size * 0.35,
-                    color: 'white',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                     zIndex: 2 - i,
+                    overflow: 'hidden',
+                    transform: `rotate(${p.tilt}deg)`,
                   }}
                 >
-                  {p.letter}
+                  <img 
+                    src={p.photo} 
+                    alt="" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                 </div>
               ))}
 
@@ -270,8 +249,12 @@ export default function HomePage() {
                           overflow: 'hidden',
                         }}
                       >
-                        {/* Placeholder content inside blob */}
-                        <BookOpen style={{ width: 48, height: 48, color: 'white', opacity: 0.6 }} />
+                        {/* actual images inside blobs */}
+                        <img 
+                          src={missionImages[i]} 
+                          alt={feature.title} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.92 }} 
+                        />
                       </div>
                       {i === 0 && <StarDecor style={{ top: -10, right: 20 }} size={18} />}
                       {i === 2 && <CircleDotDecor style={{ bottom: 10, left: 10 }} size={12} />}
@@ -399,11 +382,11 @@ export default function HomePage() {
             {/* Left — big stats */}
             <div>
               <div className="mb-8">
-                <span className="font-display" style={{ fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 700, color: 'var(--color-text-primary)' }}>45K+</span>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 500, color: 'var(--color-text-body)', marginTop: 4 }}>Instructor</p>
+                <span className="font-display" style={{ fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 700, color: 'var(--color-text-primary)' }}>45+</span>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 500, color: 'var(--color-text-body)', marginTop: 4 }}>Instructors</p>
               </div>
               <div className="mb-8">
-                <span className="font-display" style={{ fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 700, color: 'var(--color-text-primary)' }}>2.5M+</span>
+                <span className="font-display" style={{ fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: 700, color: 'var(--color-text-primary)' }}>{stats.totalCourses > 0 ? `${stats.totalCourses}+` : '50+'}</span>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 500, color: 'var(--color-text-body)', marginTop: 4 }}>Courses</p>
               </div>
               <Link to="/courses" className="btn btn-secondary no-underline">
@@ -414,30 +397,32 @@ export default function HomePage() {
             {/* Right — instructor photo circles */}
             <div className="flex flex-wrap gap-4 justify-center">
               {[
-                { name: 'Rahul K.', bg: '#7EC8C8', size: 100 },
-                { name: 'Anita M.', bg: '#F5D770', size: 80 },
-                { name: 'Dev P.', bg: '#C4B5E8', size: 90 },
-                { name: 'Neha S.', bg: '#F4A98A', size: 85 },
-                { name: 'Vikas R.', bg: '#A8D8B9', size: 75 },
-                { name: 'Sara T.', bg: '#7EC8C8', size: 95 },
+                { name: 'Rahul K.', photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&q=80', bg: '#7EC8C8', size: 100 },
+                { name: 'Anita M.', photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&q=80', bg: '#F5D770', size: 80 },
+                { name: 'Dev P.', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&q=80', bg: '#C4B5E8', size: 90 },
+                { name: 'Neha S.', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&q=80', bg: '#F4A98A', size: 85 },
+                { name: 'Vikas R.', photo: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&h=200&fit=crop&q=80', bg: '#A8D8B9', size: 75 },
+                { name: 'Sara T.', photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop&q=80', bg: '#7EC8C8', size: 95 },
               ].map((inst, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-center flex-col"
-                  style={{
-                    width: inst.size,
-                    height: inst.size,
-                    borderRadius: '50%',
-                    background: inst.bg,
-                    border: '3px solid white',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontWeight: 600,
-                    fontSize: 12,
-                    color: 'white',
-                  }}
-                >
-                  {inst.name.split(' ')[0]}
+                <div key={i} className="flex flex-col items-center gap-1" title={inst.name}>
+                  <div
+                    style={{
+                      width: inst.size,
+                      height: inst.size,
+                      borderRadius: '50%',
+                      background: inst.bg,
+                      border: '3px solid white',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <img 
+                      src={inst.photo} 
+                      alt={inst.name} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2, fontWeight: 500 }}>{inst.name}</span>
                 </div>
               ))}
             </div>
