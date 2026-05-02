@@ -12,12 +12,13 @@ const { paginate, paginationMeta } = require('../utils/paginate');
 const PLATFORM_FEE = parseFloat(process.env.PLATFORM_FEE_PERCENT || 10) / 100;
 
 const createCheckout = asyncHandler(async (req, res) => {
-  if (stripe.isDummy) return res.status(503).json(new ApiResponse(503, null, 'Payments are disabled in development mode. Set a real STRIPE_SECRET_KEY to enable.'));
   const { courseId, couponCode } = req.body;
   const course = await Course.findById(courseId).populate('instructor', 'name');
   if (!course || course.status !== 'published') throw new ApiError(404, 'Course not found');
   const enrolled = await Enrollment.findOne({ user: req.user._id, course: courseId });
   if (enrolled) throw new ApiError(409, 'Already enrolled');
+
+  const isDevMode = stripe.isDummy;
 
   let finalAmount = course.price;
   let discountAmount = 0;
@@ -40,6 +41,10 @@ const createCheckout = asyncHandler(async (req, res) => {
     await Course.findByIdAndUpdate(courseId, { $inc: { enrolledCount: 1 } });
     if (couponDoc) { couponDoc.usedCount += 1; couponDoc.usedBy.push({ user: req.user._id, orderId: order._id }); await couponDoc.save(); }
     return res.json(new ApiResponse(200, { free: true }, 'Enrolled for free'));
+  }
+
+  if (isDevMode) {
+    return res.json(new ApiResponse(200, { mockPayment: true, amount: finalAmount, courseId, couponCode: couponCode || null }, 'Ready for mock payment'));
   }
 
   const session = await stripe.checkout.sessions.create({
@@ -134,4 +139,53 @@ const getInstructorRevenue = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200, result[0] || { totalPayout: 0, orderCount: 0 }));
 });
 
-module.exports = { createCheckout, verifyPayment, handleWebhook, listOrders, getMyOrders, refundOrder, getRevenue, getInstructorRevenue };
+const completeMockPayment = asyncHandler(async (req, res) => {
+  const { courseId, couponCode } = req.body;
+  const course = await Course.findById(courseId).populate('instructor', 'name');
+  if (!course || course.status !== 'published') throw new ApiError(404, 'Course not found');
+  
+  const enrolled = await Enrollment.findOne({ user: req.user._id, course: courseId });
+  if (enrolled) throw new ApiError(409, 'Already enrolled');
+
+  let finalAmount = course.price;
+  let discountAmount = 0;
+  let couponDoc = null;
+
+  if (couponCode) {
+    couponDoc = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+    if (!couponDoc) throw new ApiError(404, 'Coupon not found');
+    if (couponDoc.expiresAt && couponDoc.expiresAt < new Date()) throw new ApiError(410, 'Coupon expired');
+    if (couponDoc.maxUses && couponDoc.usedCount >= couponDoc.maxUses) throw new ApiError(422, 'Coupon limit reached');
+    const userUsed = couponDoc.usedBy.filter((u) => u.user.toString() === req.user._id.toString()).length;
+    if (userUsed >= couponDoc.perUserLimit) throw new ApiError(422, 'Coupon already used');
+    
+    discountAmount = couponDoc.type === 'percentage' ? (course.price * couponDoc.value) / 100 : couponDoc.value;
+    finalAmount = Math.max(0, course.price - discountAmount);
+  }
+
+  const order = await Order.create({ 
+    user: req.user._id, 
+    course: courseId, 
+    amount: finalAmount, 
+    originalAmount: course.price, 
+    status: 'paid', 
+    coupon: couponDoc?._id, 
+    discountAmount, 
+    platformFee: finalAmount * PLATFORM_FEE, 
+    instructorPayout: finalAmount * (1 - PLATFORM_FEE),
+    paymentMethod: 'mock-payment'
+  });
+  
+  await Enrollment.create({ user: req.user._id, course: courseId, order: order._id });
+  await Course.findByIdAndUpdate(courseId, { $inc: { enrolledCount: 1 } });
+  
+  if (couponDoc) { 
+    couponDoc.usedCount += 1; 
+    couponDoc.usedBy.push({ user: req.user._id, orderId: order._id }); 
+    await couponDoc.save(); 
+  }
+  
+  res.json(new ApiResponse(200, { success: true, orderId: order._id }, 'Enrollment completed'));
+});
+
+module.exports = { createCheckout, verifyPayment, handleWebhook, listOrders, getMyOrders, refundOrder, getRevenue, getInstructorRevenue, completeMockPayment };

@@ -9,6 +9,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), c.handleWebho
 
 router.use(verifyJWT);
 router.post('/checkout', checkoutLimiter, authorise('student'), c.createCheckout);
+router.post('/mock-complete', authorise('student'), c.completeMockPayment);
 router.get('/verify/:sessionId', c.verifyPayment);
 router.get('/orders/me', c.getMyOrders);
 
