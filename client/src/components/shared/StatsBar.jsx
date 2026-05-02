@@ -4,9 +4,9 @@
 export default function StatsBar({ stats }) {
   const defaultStats = [
     { value: '60K+', label: 'Active Learners' },
-    { value: '45K+', label: 'Certified Mentors' },
+    { value: '45+', label: 'Certified Mentors' },
+    { value: '50+', label: 'Courses & Tutorials' },
     { value: '2.5M+', label: 'Students Globally' },
-    { value: '20K+', label: 'Courses & Tutorials' },
   ];
 
   const items = stats || defaultStats;
