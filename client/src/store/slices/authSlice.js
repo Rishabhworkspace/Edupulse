@@ -25,6 +25,7 @@ export const logoutUser = createAsyncThunk('auth/logout', async (_, { rejectWith
     await api.post('/auth/logout');
     localStorage.removeItem('accessToken');
   } catch (err) {
+    localStorage.removeItem('accessToken');
     return rejectWithValue(err.response?.data?.message);
   }
 });
@@ -55,6 +56,7 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state) => { state.loading = false; })
       .addCase(registerUser.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
       .addCase(logoutUser.fulfilled, (state) => { state.user = null; })
+      .addCase(logoutUser.rejected, (state) => { state.user = null; })
       .addCase(fetchMe.fulfilled, (state, action) => { state.user = action.payload; state.initialized = true; })
       .addCase(fetchMe.rejected, (state) => { state.initialized = true; });
   },

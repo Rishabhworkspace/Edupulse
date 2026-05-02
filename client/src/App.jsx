@@ -8,17 +8,27 @@ import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleRoute from './components/auth/RoleRoute';
+import GuestRoute from './components/auth/GuestRoute';
 import ErrorBoundary from './components/shared/ErrorBoundary';
+import ScrollToTop from './components/shared/ScrollToTop';
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const CourseCatalogPage = lazy(() => import('./pages/courses/CourseCatalogPage'));
 const CourseDetailPage = lazy(() => import('./pages/courses/CourseDetailPage'));
 const CheckoutPage = lazy(() => import('./pages/payment/CheckoutPage'));
 const PaymentStatusPage = lazy(() => import('./pages/payment/PaymentStatusPage'));
 const StudentDashboard = lazy(() => import('./pages/dashboard/StudentDashboard'));
+const MyCoursesPage = lazy(() => import('./pages/dashboard/MyCoursesPage'));
+const SchedulePage = lazy(() => import('./pages/dashboard/SchedulePage'));
+const SavedCoursesPage = lazy(() => import('./pages/dashboard/SavedCoursesPage'));
+const AssignmentsPage = lazy(() => import('./pages/dashboard/AssignmentsPage'));
+const AchievementsPage = lazy(() => import('./pages/dashboard/AchievementsPage'));
+const CommunityPage = lazy(() => import('./pages/dashboard/CommunityPage'));
 const InstructorDashboard = lazy(() => import('./pages/dashboard/InstructorDashboard'));
 const AdminDashboard = lazy(() => import('./pages/dashboard/AdminDashboard'));
 const CoursePlayerPage = lazy(() => import('./pages/courses/CoursePlayerPage'));
@@ -58,28 +68,42 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+        <ScrollToTop />
         <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontFamily: "'DM Sans', sans-serif" } }} />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route element={<MainLayout />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/courses" element={<CourseCatalogPage />} />
               <Route path="/course/:slug" element={<CourseDetailPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+
+              <Route element={<GuestRoute />}>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
+                <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+              </Route>
+
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
             </Route>
 
             <Route element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<StudentDashboard />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/orders" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard/enrolled" element={<MyCoursesPage />} />
+                <Route path="/dashboard/schedule" element={<SchedulePage />} />
+                <Route path="/dashboard/saved" element={<SavedCoursesPage />} />
+                <Route path="/dashboard/assignments" element={<AssignmentsPage />} />
+                <Route path="/dashboard/achievements" element={<AchievementsPage />} />
+                <Route path="/dashboard/community" element={<CommunityPage />} />
               </Route>
-              <Route path="/checkout/:courseId" element={<CheckoutPage />} />
+              <Route path="/checkout/:courseSlug" element={<CheckoutPage />} />
               <Route path="/payment" element={<PaymentStatusPage />} />
               <Route path="/learn/:courseSlug" element={<CoursePlayerPage />} />
             </Route>

@@ -25,7 +25,7 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry && !original.url?.includes('refresh-token')) {
+    if (error.response?.status === 401 && !original._retry && !original.url?.includes('refresh-token') && !original.url?.includes('/auth/login') && !original.url?.includes('/auth/logout')) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => failedQueue.push({ resolve, reject }))
           .then((token) => { original.headers.Authorization = `Bearer ${token}`; return api(original); })
