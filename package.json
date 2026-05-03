@@ -18,7 +18,6 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "erudex-client": "^1.0.0",
-    "react-quill": "^2.0.0"
+    "erudex-client": "^1.0.0"
   }
 }
