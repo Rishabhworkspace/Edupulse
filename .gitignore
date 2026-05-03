@@ -28,8 +28,13 @@ required/
 pdf_out.txt
 pdf_content.txt
 generate_ppt.py
+generate_edupulse_ppt.py
+generate_design_doc.py
+generate_ui_pdf.py
 edupulse-presentation*
 *.pptx
+*.pdf
+commit_script.ps1
 
 # Custom folders
 do-it/
