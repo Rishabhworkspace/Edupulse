@@ -9,6 +9,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000,
+  socketTimeout: 10000,
+  greetingTimeout: 10000,
 });
 
 const FROM = `"${process.env.EMAIL_FROM_NAME || 'EduPulse'}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`;
@@ -30,7 +36,11 @@ const send = async (to, subject, html) => {
   }
 };
 
-const sendVerificationEmail = (to, name, otp) => send(to, 'Verify your EduPulse email', `
+const sendVerificationEmail = (to, name, otp) => {
+  if (process.env.NODE_ENV !== 'production') {
+    logger.info(`[DEV] OTP for ${to}: ${otp}`);
+  }
+  return send(to, 'Verify your EduPulse email', `
   <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
     <h2 style="color:#5C5FEF">Welcome to EduPulse, ${name}! 🎓</h2>
     <p>Please verify your email address to start learning.</p>
@@ -40,7 +50,8 @@ const sendVerificationEmail = (to, name, otp) => send(to, 'Verify your EduPulse 
     </div>
     <p style="color:#6B7280;font-size:14px">This code expires in 10 minutes.</p>
   </div>`
-);
+  );
+};
 
 const sendPasswordResetEmail = (to, name, token) => send(to, 'Reset your EduPulse password', `
   <div style="font-family:sans-serif;max-width:600px;margin:0 auto">

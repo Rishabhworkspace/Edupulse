@@ -96,10 +96,10 @@ export default function HomePage() {
 
               <div className="flex flex-wrap items-center gap-3">
                 <Link to="/courses" className="btn btn-primary btn-lg no-underline group">
-                  Let's Start <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  Explore <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link to="/courses" className="btn btn-ghost btn-lg no-underline">
-                  <Play className="w-4 h-4" /> Watch Demo
+                <Link to="/login" className="btn btn-ghost btn-lg no-underline">
+                  Let's Start
                 </Link>
               </div>
             </motion.div>
