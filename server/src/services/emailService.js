@@ -16,9 +16,9 @@ const getTransporter = () => {
     tls: {
       rejectUnauthorized: false
     },
-    connectionTimeout: 8000,
-    socketTimeout: 8000,
-    greetingTimeout: 8000,
+    connectionTimeout: 30000,
+    socketTimeout: 30000,
+    greetingTimeout: 30000,
   });
 };
 
