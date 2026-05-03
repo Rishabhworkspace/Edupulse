@@ -5,19 +5,18 @@ const footerLinks = [
   {
     title: 'About',
     links: [
-      { label: 'About Us', to: '/' },
+      { label: 'About Us', to: '/about' },
       { label: 'Courses', to: '/courses' },
-      { label: 'News & Blogs', to: '/' },
-      { label: 'Become an Instructor', to: '/register' },
+      { label: 'Become an Instructor', to: '/register?role=instructor' },
     ],
   },
   {
     title: 'Resources',
     links: [
       { label: 'Browse Courses', to: '/courses' },
-      { label: 'For Instructors', to: '/register' },
-      { label: 'Privacy Policy', to: '/' },
-      { label: 'Terms of Service', to: '/' },
+      { label: 'For Instructors', to: '/instructor' },
+      { label: 'Privacy Policy', to: '/privacy' },
+      { label: 'Terms of Service', to: '/terms' },
     ],
   },
 ];
@@ -85,9 +84,9 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold mb-4" style={{ fontFamily: "'DM Sans', sans-serif", color: 'var(--color-text-primary)' }}>Contact</h4>
             <div className="space-y-3">
-              <a href="tel:+919876543210" className="flex items-center gap-2 text-sm no-underline" style={{ color: 'var(--color-text-body)' }}>
+              <a href="tel:987654xxxx" className="flex items-center gap-2 text-sm no-underline" style={{ color: 'var(--color-text-body)' }}>
                 <Phone className="w-4 h-4" style={{ color: 'var(--color-coral)' }} />
-                +91 98765 43210
+                987654xxxx
               </a>
               <a href="mailto:hello@edupulse.in" className="flex items-center gap-2 text-sm no-underline" style={{ color: 'var(--color-text-body)' }}>
                 <Mail className="w-4 h-4" style={{ color: 'var(--color-coral)' }} />
@@ -100,7 +99,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid var(--gray-300)' }}>
           <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>© {new Date().getFullYear()} EduPulse. All rights reserved.</p>
-          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Built with ♥ for learners everywhere</p>
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Made by Rishabh</p>
         </div>
       </div>
     </footer>

@@ -1,14 +1,9 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Award, BookOpen, Globe } from 'lucide-react';
+import { Users, Award, BookOpen, Globe, CheckCircle } from 'lucide-react';
+import api from '@/lib/api';
 import SectionHeading from '../components/shared/SectionHeading';
 import * as DecorativeElements from '../components/shared/DecorativeElements';
-
-const stats = [
-  { icon: <Users className="w-6 h-6" />, value: '50K+', label: 'Active Learners' },
-  { icon: <BookOpen className="w-6 h-6" />, value: '200+', label: 'Expert Courses' },
-  { icon: <Award className="w-6 h-6" />, value: '100%', label: 'Quality Assured' },
-  { icon: <Globe className="w-6 h-6" />, value: '120+', label: 'Countries Reached' },
-];
 
 const team = [
   {
@@ -34,6 +29,42 @@ const team = [
 ];
 
 export default function AboutPage() {
+  const [statsData, setStatsData] = useState({
+    totalCourses: 0,
+    totalEnrollments: 0,
+    completedEnrollments: 0,
+    avgCompletionRate: 0
+  });
+
+  useEffect(() => {
+    api.get('/courses/stats')
+      .then(({ data }) => setStatsData(data.data))
+      .catch(() => {});
+  }, []);
+
+  const stats = [
+    { 
+      icon: <Users className="w-6 h-6" />, 
+      value: statsData.totalEnrollments > 1000 ? `${(statsData.totalEnrollments / 1000).toFixed(1)}K+` : `${statsData.totalEnrollments}+`, 
+      label: 'Active Learners' 
+    },
+    { 
+      icon: <BookOpen className="w-6 h-6" />, 
+      value: `${statsData.totalCourses}+`, 
+      label: 'Expert Courses' 
+    },
+    { 
+      icon: <Award className="w-6 h-6" />, 
+      value: statsData.completedEnrollments > 1000 ? `${(statsData.completedEnrollments / 1000).toFixed(1)}K+` : `${statsData.completedEnrollments}+`, 
+      label: 'Certificates Issued' 
+    },
+    { 
+      icon: <CheckCircle className="w-6 h-6" />, 
+      value: `${statsData.avgCompletionRate}%`, 
+      label: 'Completion Rate' 
+    },
+  ];
+
   return (
     <div className="min-h-screen pb-20">
       {/* Hero Section */}

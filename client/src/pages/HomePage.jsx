@@ -104,40 +104,125 @@ export default function HomePage() {
               </div>
             </motion.div>
 
-            {/* Right — Photo collage */}
+            {/* Right — Hero Illustration */}
             <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="relative hidden md:block" style={{ minHeight: 480 }}>
-              {/* Cards collage */}
-              {[
-                { top: 40, left: 0, width: 240, height: 280, borderRadius: 24, bg: '#7EC8C8', photo: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=400&fit=crop&q=80', tilt: -4 },
-                { top: 0, right: 0, width: 180, height: 180, borderRadius: 20, bg: '#F5D770', photo: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=300&h=300&fit=crop&q=80', tilt: 6 },
-                { bottom: 20, right: 40, width: 160, height: 160, borderRadius: '50%', bg: '#C4B5E8', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&q=80', tilt: 0 },
-              ].map((p, i) => (
-                <div
-                  key={i}
+              {/* Main Illustration Container */}
+              <div className="relative w-full h-full flex items-center justify-center">
+                {/* Abstract Background Shapes */}
+                <div 
                   style={{
                     position: 'absolute',
-                    ...Object.fromEntries(Object.entries(p).filter(([k]) => ['top', 'right', 'left', 'bottom'].includes(k))),
-                    width: p.width, height: p.height,
-                    borderRadius: p.borderRadius,
-                    background: p.bg,
-                    border: '4px solid white',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    zIndex: 2 - i,
-                    overflow: 'hidden',
-                    transform: `rotate(${p.tilt}deg)`,
+                    width: '380px',
+                    height: '380px',
+                    borderRadius: '50%',
+                    background: 'var(--color-coral-light)',
+                    opacity: 0.4,
+                    filter: 'blur(60px)',
+                    zIndex: 0
+                  }}
+                />
+                <div 
+                  style={{
+                    position: 'absolute',
+                    width: '300px',
+                    height: '300px',
+                    borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
+                    background: '#C4B5E8',
+                    opacity: 0.3,
+                    top: '10%',
+                    right: '5%',
+                    zIndex: 0,
+                    animation: 'morph 8s ease-in-out infinite'
+                  }}
+                />
+
+                {/* Main Image */}
+                <div 
+                  style={{
+                    position: 'relative',
+                    width: '340px',
+                    height: '420px',
+                    borderRadius: '32px',
+                    background: '#fff',
+                    padding: '12px',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.1)',
+                    transform: 'rotate(-2deg)',
+                    zIndex: 2,
+                    border: '1px solid var(--gray-300)'
                   }}
                 >
                   <img 
-                    src={p.photo} 
-                    alt="" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=800&fit=crop&q=80" 
+                    alt="Students collaborating" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '24px' }}
                   />
-                </div>
-              ))}
+                  
+                  {/* Floating Skill Badges */}
+                  <motion.div 
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    style={{
+                      position: 'absolute',
+                      top: '-20px',
+                      right: '-30px',
+                      background: 'white',
+                      padding: '12px 20px',
+                      borderRadius: '16px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      zIndex: 3,
+                      border: '1px solid var(--gray-100)'
+                    }}
+                  >
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-coral)' }} />
+                    <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)' }}>Web Development</span>
+                  </motion.div>
 
-              {/* Floating decorations on collage */}
-              <StarDecor style={{ top: 0, left: 20 }} size={18} />
-              <SparkleDecor style={{ bottom: 60, right: 20 }} size={16} className="decor-float-delay-1" />
+                  <motion.div 
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    style={{
+                      position: 'absolute',
+                      bottom: '40px',
+                      left: '-40px',
+                      background: 'white',
+                      padding: '12px 20px',
+                      borderRadius: '16px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      zIndex: 3,
+                      border: '1px solid var(--gray-100)'
+                    }}
+                  >
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#7EC8C8' }} />
+                    <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)' }}>UI/UX Design</span>
+                  </motion.div>
+                </div>
+
+                {/* Additional Decorative Elements */}
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '20%',
+                    left: '0',
+                    width: '120px',
+                    height: '120px',
+                    borderRadius: '24px',
+                    background: '#F5D770',
+                    transform: 'rotate(15deg)',
+                    zIndex: 1,
+                    opacity: 0.8
+                  }}
+                />
+              </div>
+
+              {/* Original floating decorations */}
+              <StarDecor style={{ top: 0, left: 20 }} size={24} />
+              <SparkleDecor style={{ bottom: 60, right: 20 }} size={20} className="decor-float-delay-1" />
             </motion.div>
           </div>
         </div>
