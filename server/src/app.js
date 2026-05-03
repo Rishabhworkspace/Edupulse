@@ -22,6 +22,9 @@ const contactRoutes = require('./routes/v1/contact.routes');
 
 const app = express();
 
+// Trust proxy for secure cookies and protocol detection (Heroku/Vercel/Nginx)
+app.set('trust proxy', 1);
+
 // Security headers
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
 

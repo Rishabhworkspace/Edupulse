@@ -29,7 +29,12 @@ module.exports = (passport) => {
 
   if (process.env.GOOGLE_CLIENT_ID) {
     passport.use(new GoogleStrategy(
-      { clientID: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET, callbackURL: '/api/v1/auth/oauth/google/callback' },
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.CLIENT_URL}/api/v1/auth/oauth/google/callback`,
+        proxy: true
+      },
       (accessToken, refreshToken, profile, done) => handleOAuth('google', profile, done)
     ));
   }
