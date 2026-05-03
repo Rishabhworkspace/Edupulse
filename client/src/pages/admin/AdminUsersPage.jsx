@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Shield, Ban, ChevronDown, Users, UserCog } from 'lucide-react';
+import { Search, Shield, Ban, ChevronDown, Users, UserCog, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -40,6 +40,15 @@ export default function AdminUsersPage() {
       toast.success(`Role updated to ${role}`);
       fetchUsers();
     } catch (err) { toast.error(err.response?.data?.message || 'Action failed'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to PERMANENTLY delete this user? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/users/${id}`);
+      toast.success('User deleted');
+      fetchUsers();
+    } catch (err) { toast.error(err.response?.data?.message || 'Delete failed'); }
   };
 
   return (
@@ -100,6 +109,9 @@ export default function AdminUsersPage() {
                       </select>
                       <button onClick={() => handleBan(u._id, !u.isBanned)} className={`btn btn-sm ${u.isBanned ? 'btn-secondary' : 'btn-danger'}`}>
                         {u.isBanned ? 'Unban' : 'Ban'}
+                      </button>
+                      <button onClick={() => handleDelete(u._id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors" style={{ border: 'none', background: 'transparent', cursor: 'pointer' }} title="Delete Permanently">
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
