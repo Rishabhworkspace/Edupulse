@@ -10,7 +10,7 @@ const emailService = require('../services/emailService');
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'Strict',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'Lax',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
