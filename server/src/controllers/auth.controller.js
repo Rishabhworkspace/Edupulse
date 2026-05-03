@@ -31,7 +31,13 @@ const register = asyncHandler(async (req, res) => {
     emailVerifyExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
   });
 
-  await emailService.sendVerificationEmail(user.email, user.name, otp);
+  try {
+    await emailService.sendVerificationEmail(user.email, user.name, otp);
+  } catch (error) {
+    // Rollback user creation if email fails so they aren't trapped in an unverified state
+    await User.findByIdAndDelete(user._id);
+    throw new ApiError(500, `Failed to deliver OTP: ${error.message}. Please check email configuration.`);
+  }
 
   res.status(201).json(
     new ApiResponse(201, { _id: user._id, name: user.name, email: user.email, role: user.role },

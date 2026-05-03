@@ -1,45 +1,51 @@
 const nodemailer = require('nodemailer');
 const logger = require('../utils/logger');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.sendgrid.net',
-  port: process.env.EMAIL_PORT || 587,
-  secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false
-  },
-  connectionTimeout: 10000,
-  socketTimeout: 10000,
-  greetingTimeout: 10000,
-});
-
-const FROM = `"${process.env.EMAIL_FROM_NAME || 'EduPulse'}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`;
+const getTransporter = () => {
+  const host = process.env.EMAIL_HOST || 'smtp.sendgrid.net';
+  const isSendGrid = host.includes('sendgrid');
+  
+  return nodemailer.createTransport({
+    host,
+    port: parseInt(process.env.EMAIL_PORT) || 587,
+    secure: parseInt(process.env.EMAIL_PORT) === 465,
+    auth: {
+      user: isSendGrid ? 'apikey' : process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 8000,
+    socketTimeout: 8000,
+    greetingTimeout: 8000,
+  });
+};
 
 const send = async (to, subject, html) => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    logger.info(`[Email - SKIPPED] Credentials missing. To: ${to} | Subject: ${subject}`);
-    return;
+  if (!process.env.EMAIL_PASS) {
+    logger.error(`[Email - SKIPPED] No EMAIL_PASS provided.`);
+    throw new Error('Email service is not configured (missing password)');
   }
+
+  const transporter = getTransporter();
+  const FROM = `"${process.env.EMAIL_FROM_NAME || 'EduPulse'}" <${process.env.EMAIL_FROM || 'noreply@edupulse.com'}>`;
+
   try {
-    await transporter.sendMail({ from: FROM, to, subject, html });
-    logger.info(`[Email - SENT] To: ${to} | Subject: ${subject}`);
+    const info = await transporter.sendMail({ from: FROM, to, subject, html });
+    logger.info(`[Email - SENT] To: ${to} | MessageID: ${info.messageId}`);
+    return info;
   } catch (error) {
     logger.error(`[Email - FAILED] To: ${to} | Error: ${error.message}`);
-    // In production, we might want to throw the error to be handled by the controller
-    if (process.env.NODE_ENV === 'production') {
-      throw error;
-    }
+    // Always throw the error so the controller can handle it (e.g. rollback DB)
+    throw new Error(`SMTP Error: ${error.message}`);
   }
 };
 
 const sendVerificationEmail = (to, name, otp) => {
-  if (process.env.NODE_ENV !== 'production') {
-    logger.info(`[DEV] OTP for ${to}: ${otp}`);
-  }
+  // ALWAYS log OTP so admin can manually verify users if SMTP is completely broken
+  logger.info(`[CRITICAL - OTP GENERATED] Email: ${to} | OTP: ${otp}`);
+  
   return send(to, 'Verify your EduPulse email', `
   <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
     <h2 style="color:#5C5FEF">Welcome to EduPulse, ${name}! 🎓</h2>
