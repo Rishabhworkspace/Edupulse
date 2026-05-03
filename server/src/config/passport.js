@@ -32,7 +32,7 @@ module.exports = (passport) => {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.CLIENT_URL}/api/v1/auth/oauth/google/callback`,
+        callbackURL: `${process.env.SERVER_URL || 'http://localhost:5000'}/api/v1/auth/oauth/google/callback`,
         proxy: true
       },
       (accessToken, refreshToken, profile, done) => handleOAuth('google', profile, done)

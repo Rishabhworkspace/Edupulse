@@ -14,11 +14,20 @@ const transporter = nodemailer.createTransport({
 const FROM = `"${process.env.EMAIL_FROM_NAME || 'EduPulse'}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`;
 
 const send = async (to, subject, html) => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || process.env.EMAIL_PASS === 'your_gmail_app_password') {
-    logger.info(`[Email - DEV] To: ${to} | Subject: ${subject}`);
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    logger.info(`[Email - SKIPPED] Credentials missing. To: ${to} | Subject: ${subject}`);
     return;
   }
-  await transporter.sendMail({ from: FROM, to, subject, html });
+  try {
+    await transporter.sendMail({ from: FROM, to, subject, html });
+    logger.info(`[Email - SENT] To: ${to} | Subject: ${subject}`);
+  } catch (error) {
+    logger.error(`[Email - FAILED] To: ${to} | Error: ${error.message}`);
+    // In production, we might want to throw the error to be handled by the controller
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+  }
 };
 
 const sendVerificationEmail = (to, name, otp) => send(to, 'Verify your EduPulse email', `
