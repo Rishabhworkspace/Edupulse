@@ -26,7 +26,11 @@ export default function LoginPage() {
       toast.success('Welcome back!');
       navigate(getDashboardUrl(result.payload.user?.role));
     } else {
-      toast.error(result.payload || 'Login failed');
+      const errorMsg = result.payload || 'Login failed';
+      toast.error(errorMsg);
+      if (errorMsg.toLowerCase().includes('verify')) {
+        navigate(`/verify-email?email=${form.email}`);
+      }
     }
   };
 

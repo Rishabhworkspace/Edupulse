@@ -23,8 +23,8 @@ export default function RegisterPage() {
     dispatch(clearError());
     const result = await dispatch(registerUser(form));
     if (registerUser.fulfilled.match(result)) {
-      toast.success('Account created! Please log in.');
-      navigate('/login');
+      toast.success('Account created! Please verify your email.');
+      navigate(`/verify-email?email=${form.email}`);
     } else {
       toast.error(result.payload || 'Registration failed');
     }

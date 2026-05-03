@@ -63,7 +63,7 @@ export default function VerifyEmailPage() {
           </div>
           <h1 className="font-display text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Verify your email</h1>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Enter the 6-digit code sent to <strong>{email}</strong></p>
-          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>💡 Check spam folders for OTP</p>
+          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>💡 Check spam folders for otp</p>
         </div>
 
         <div className="card p-8">

@@ -22,23 +22,6 @@ const register = asyncHandler(async (req, res) => {
   const exists = await User.findOne({ email });
   if (exists) throw new ApiError(409, 'Email already registered');
 
-  const isDev = process.env.NODE_ENV !== 'production';
-  
-  if (isDev) {
-    // Auto-verify in development mode
-    const user = await User.create({
-      name,
-      email,
-      password,
-      isVerified: true,
-    });
-
-    return res.status(201).json(
-      new ApiResponse(201, { _id: user._id, name: user.name, email: user.email, role: user.role },
-        'Registration successful! You can now log in.')
-    );
-  }
-
   const otp = generateOTP();
   const user = await User.create({
     name,
@@ -66,14 +49,8 @@ const login = asyncHandler(async (req, res) => {
   if (!isMatch) throw new ApiError(401, 'Invalid email or password');
   if (user.isBanned) throw new ApiError(403, 'Account suspended. Contact support.');
 
-  const isDev = process.env.NODE_ENV !== 'production';
   if (!user.isVerified) {
-    if (isDev) {
-      user.isVerified = true;
-      await user.save({ validateBeforeSave: false });
-    } else {
-      throw new ApiError(403, 'Please verify your email first');
-    }
+    throw new ApiError(403, 'Please verify your email first');
   }
 
   const payload = { id: user._id, role: user.role };

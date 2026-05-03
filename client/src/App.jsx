@@ -17,7 +17,12 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+
 const CourseCatalogPage = lazy(() => import('./pages/courses/CourseCatalogPage'));
 const CourseDetailPage = lazy(() => import('./pages/courses/CourseDetailPage'));
 const CheckoutPage = lazy(() => import('./pages/payment/CheckoutPage'));
@@ -32,7 +37,6 @@ const CommunityPage = lazy(() => import('./pages/dashboard/CommunityPage'));
 const InstructorDashboard = lazy(() => import('./pages/dashboard/InstructorDashboard'));
 const AdminDashboard = lazy(() => import('./pages/dashboard/AdminDashboard'));
 const CoursePlayerPage = lazy(() => import('./pages/courses/CoursePlayerPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
